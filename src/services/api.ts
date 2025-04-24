@@ -44,41 +44,36 @@ export const registerUser = async (
 };
 
 export const loginUser = async (
-	credentials: Pick<UserCredentials, 'email' | 'password'>
+  credentials: Pick<UserCredentials, 'email' | 'password'>
 ): Promise<AuthResponse> => {
-	// console.log('[loginUser] Attempting login for:', credentials.email);
-	try {
-		const response = await apiClient.post<{
-			access_token: string;
-			token_type: string;
-			user?: User;
-		}>('/login', credentials);
-		// console.log('[loginUser] Login API response received:', response.data);
+  console.log('[loginUser] Attempting login for:', credentials.email);
+  try {
+    const response = await apiClient.post<{
+      access_token?: string;
+      token?: string;
+      token_type?: string;
+      user?: User;
+    }>('/login', credentials);
+    console.log('[loginUser] Login API response received:', response.data);
 
-		if (response.data.access_token) {
-			// console.log('[loginUser] Token received:', response.data.access_token);
-			localStorage.setItem('authToken', response.data.access_token);
-			// console.log('[loginUser] Token stored in localStorage.');
-			// console.log(
-			// 	'[loginUser] Value in localStorage after set:',
-			// 	localStorage.getItem('authToken')
-			// );
-		} else {
-			console.warn('[loginUser] No access_token received in login response.');
-		}
+    const data = response.data;
+    const authToken = data.access_token ?? data.token;
+    if (!authToken) {
+      throw new Error('[loginUser] No token received in login response.');
+    }
 
-		const authResponse: AuthResponse = {
-			token: response.data.access_token,
+    localStorage.setItem('authToken', authToken);
+    console.log('[loginUser] Token stored in localStorage.');
 
-			user: response.data.user || null,
-			message: 'Login successful',
-		};
-
-		return authResponse;
-	} catch (error) {
-		console.error('[loginUser] Login API error:', error);
-		throw error;
-	}
+    return {
+      token: authToken,
+      user: data.user ?? null,
+      message: 'Login successful',
+    };
+  } catch (error) {
+    console.error('[loginUser] Login API error:', error);
+    throw error;
+  }
 };
 
 export const getTasks = async (): Promise<Task[]> => {
