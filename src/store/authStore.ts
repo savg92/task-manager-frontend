@@ -1,0 +1,237 @@
+import { create } from 'zustand';
+import { UserCredentials, User, AuthResponse } from '../types/user';
+import { loginUser, registerUser } from '../services/api';
+import api from '../services/api';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+
+// Define the shape of your state
+export interface AuthState {
+	isAuthenticated: boolean;
+	user: User | null;
+	loading: boolean;
+	error: string | null;
+	isInitialized: boolean; // Add flag to track initialization
+}
+
+// Define the shape of your actions
+export interface AuthActions {
+	login: (
+		credentials: Pick<UserCredentials, 'email' | 'password'>
+	) => Promise<void>;
+	register: (credentials: UserCredentials) => Promise<void>;
+	logout: () => void;
+	clearError: () => void;
+	initializeAuth: () => void; // Add initialization action
+}
+
+// Define the full store type (State + Actions)
+export type AuthStore = AuthState & AuthActions;
+
+// Helper function to check token validity (basic check)
+const isTokenValid = (token: string): { valid: boolean; user: User | null } => {
+	console.log('[isTokenValid] Checking token:', token);
+	if (!token) {
+		console.log('[isTokenValid] No token provided.');
+		return { valid: false, user: null };
+	}
+	try {
+		// Decode token - Add more checks like expiration if needed
+		// Define the expected payload structure more accurately
+		const decoded: {
+			sub: string;
+			email?: string;
+			username?: string;
+			exp?: number;
+		} = jwtDecode(token);
+		console.log('[isTokenValid] Decoded token:', decoded);
+
+		// Optional: Check expiration
+		if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+			console.log('[isTokenValid] Token expired.');
+			localStorage.removeItem('authToken');
+			return { valid: false, user: null };
+		}
+
+		// *** Map 'sub' to 'id' and include email/username if present ***
+		const userResult: User = {
+			id: decoded.sub, // Use 'sub' field from token for user ID
+			email: decoded.email, // Include email if present in token
+			// Add other fields like username if they are in the token and User type
+		};
+		console.log('[isTokenValid] Token is valid. User:', userResult);
+		return { valid: true, user: userResult };
+	} catch (error) {
+		console.error('[isTokenValid] Invalid token error:', error);
+		localStorage.removeItem('authToken'); // Remove invalid token
+		return { valid: false, user: null };
+	}
+};
+
+export const useAuthStore = create<AuthStore>((set, get) => ({
+	// Initial state
+	isAuthenticated: false,
+	user: null,
+	loading: false,
+	error: null,
+	isInitialized: false, // Start as not initialized
+
+	// Actions
+	initializeAuth: () => {
+		console.log('[initializeAuth] Starting initialization...');
+		if (get().isInitialized) {
+			console.log('[initializeAuth] Already initialized.');
+			return; // Prevent re-initialization
+		}
+
+		const token = localStorage.getItem('authToken');
+		console.log('[initializeAuth] Token from localStorage:', token);
+
+		if (token) {
+			const { valid, user } = isTokenValid(token);
+			console.log('[initializeAuth] Token validation result:', { valid, user });
+			if (valid && user) {
+				console.log('[initializeAuth] Setting authenticated state.');
+				api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+				set({
+					isAuthenticated: true,
+					user: user,
+					isInitialized: true,
+					loading: false,
+					error: null,
+				});
+				console.log('[initializeAuth] State after setting auth:', get());
+				return;
+			}
+		}
+		// If no token or token invalid
+		console.log('[initializeAuth] Setting unauthenticated state.');
+		set({
+			isAuthenticated: false,
+			user: null,
+			isInitialized: true,
+			loading: false,
+			error: null,
+		});
+		console.log('[initializeAuth] State after setting no auth:', get());
+	},
+
+	login: async (credentials) => {
+		console.log(
+			'[AuthStore.login] Starting login action for:',
+			credentials.email
+		);
+		set({ loading: true, error: null });
+		try {
+			const authResponse: AuthResponse = await loginUser(credentials);
+			console.log(
+				'[AuthStore.login] loginUser call successful. Response:',
+				authResponse
+			);
+
+			const token = localStorage.getItem('authToken'); // Or use authResponse.token
+			console.log(
+				'[AuthStore.login] Token from localStorage immediately after loginUser:',
+				token
+			);
+
+			// *** Check only for token, as user object might not be in response ***
+			if (token) {
+				console.log(
+					'[AuthStore.login] Token found. Setting authenticated state in store.'
+				);
+				// No need to set default header here, interceptor handles it
+				// api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+				// Decode token to get user info (adjust based on your token structure)
+				let user: User | null = authResponse.user; // Use user from response if available
+				if (!user) {
+					try {
+						const decoded: { sub: string; email?: string; username?: string } =
+							jwtDecode(token);
+						user = {
+							id: decoded.sub,
+							email: decoded.email /* add username if needed */,
+						};
+						console.log(
+							'[AuthStore.login] User info extracted from token:',
+							user
+						);
+					} catch (decodeError) {
+						console.error(
+							'[AuthStore.login] Failed to decode token after login:',
+							decodeError
+						);
+						// Decide how to handle: proceed without user info or treat as error?
+						// Proceeding without user info for now:
+						user = null;
+					}
+				}
+
+				set({
+					isAuthenticated: true,
+					user: user, // Use user from response or decoded token
+					loading: false,
+					error: null, // Clear error on success
+				});
+				console.log('[AuthStore.login] State after setting auth:', get());
+			} else {
+				// This case should ideally not happen if loginUser succeeded and returned a token
+				console.error(
+					'[AuthStore.login] Login succeeded but token missing after loginUser call.'
+				);
+				set({
+					isAuthenticated: false,
+					user: null,
+					loading: false,
+					error: 'Login completed but token was not processed correctly.',
+				});
+			}
+		} catch (err) {
+			console.error('[AuthStore.login] Error during login action:', err);
+			let message = 'Login failed';
+			if (axios.isAxiosError(err) && err.response) {
+				message = err.response.data?.message || err.message;
+			} else if (err instanceof Error) {
+				message = err.message;
+			}
+			set({
+				error: message,
+				loading: false,
+				isAuthenticated: false,
+				user: null,
+			});
+		}
+	},
+
+	register: async (credentials) => {
+		set({ loading: true, error: null });
+		try {
+			// Use the imported registerUser function
+			await registerUser(credentials);
+			set({ loading: false });
+		} catch (err) {
+			// Use unknown or a more specific error type
+			let message = 'Registration failed';
+			if (axios.isAxiosError(err) && err.response) {
+				// Access err.response.data safely
+				message = err.response.data?.message || err.message;
+			} else if (err instanceof Error) {
+				message = err.message;
+			}
+			set({ error: message, loading: false });
+			// Re-throw the error so the calling component knows about the failure
+			throw err;
+		}
+	},
+
+	logout: () => {
+		localStorage.removeItem('authToken'); // Clear token
+		delete api.defaults.headers.common['Authorization']; // Remove header from raw client if still used
+		set({ isAuthenticated: false, user: null, error: null, loading: false });
+	},
+
+	clearError: () => {
+		set({ error: null });
+	},
+}));
