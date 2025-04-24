@@ -1,54 +1,66 @@
-# React + TypeScript + Vite
+# Task Manager Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a frontend application for a Task Manager, built using React, TypeScript, and Vite. It allows users to register, log in, manage their tasks, and view task statistics.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*   User authentication (Register/Login)
+*   Create, Read, Update, Delete (CRUD) operations for tasks
+*   View tasks in a list format
+*   Visualize task status distribution with a chart
+*   Protected routes for authenticated users
 
-## Expanding the ESLint configuration
+## Technologies Used
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+*   **Framework:** React
+*   **Language:** TypeScript
+*   **Build Tool:** Vite
+*   **Routing:** React Router DOM
+*   **State Management:** Zustand
+*   **API Client:** Axios
+*   **Styling:** CSS (potentially with a UI library if added)
+*   **Charting:** Recharts (based on `TaskChart.tsx`)
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Project Setup
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/savg92/task-manager-frontend
+    cd task-manager-frontend
+    ```
+
+2.  **Install dependencies:**
+    Make sure you have Node.js and npm (or yarn/bun) installed.
+    ```bash
+    npm install
+    # or
+    yarn install
+    # or
+    bun install
+    ```
+
+## Running the Project
+
+To start the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+bun dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+This will start the Vite development server, typically available at `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Building for Production
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+To create a production build:
+
+```bash
+npm run build
+# or
+yarn build
+# or
+bun build
 ```
