@@ -16,35 +16,29 @@ const AddTaskForm: React.FC = () => {
 	const [description, setDescription] = useState('');
 	const [formError, setFormError] = useState<string | null>(null);
 
-	// Get QueryClient instance
 	const queryClient = useQueryClient();
 
-	// Use React Query's useMutation for adding tasks
 	const {
 		mutate: addTaskMutate,
 		isPending: loading,
 		error,
 	} = useMutation({
-		mutationFn: createTask, // The function to call for the mutation
+		mutationFn: createTask,
 		onSuccess: () => {
-			// Invalidate the 'tasks' query to refetch data after successful addition
 			queryClient.invalidateQueries({ queryKey: ['tasks'] });
-			// Clear form on successful submission
+
 			setTitle('');
 			setDescription('');
 			setFormError(null);
 		},
 		onError: (err) => {
-			// Error is available in the `error` variable from useMutation
 			console.error('Failed to add task:', err);
-			// Optionally set a form-specific error message
-			// setFormError("Failed to add task. Please try again.");
 		},
 	});
 
 	const handleSubmit = (event: React.FormEvent) => {
 		event.preventDefault();
-		setFormError(null); // Clear previous form error
+		setFormError(null);
 
 		if (!title.trim()) {
 			setFormError('Title is required.');
@@ -53,11 +47,10 @@ const AddTaskForm: React.FC = () => {
 
 		const newTask: TaskCreatePayload = {
 			title: title.trim(),
-			description: description.trim() || undefined, // Send undefined if empty
-			status: 'TODO', // Default status
+			description: description.trim() || undefined,
+			status: 'TODO',
 		};
 
-		// Call the mutation function
 		addTaskMutate(newTask);
 	};
 
@@ -71,7 +64,7 @@ const AddTaskForm: React.FC = () => {
 		>
 			<Typography variant='h6'>Add New Task</Typography>
 			{formError && <Alert severity='warning'>{formError}</Alert>}
-			{/* Display error from the mutation hook */}
+			{}
 			{error && <Alert severity='error'>{error.message}</Alert>}
 			<TextField
 				label='Title'
@@ -95,9 +88,8 @@ const AddTaskForm: React.FC = () => {
 			<Button
 				type='submit'
 				variant='contained'
-				disabled={loading || !title.trim()} // Disable if loading or title is empty
+				disabled={loading || !title.trim()}
 				sx={{
-					// Make button full width on small screens, align start on larger screens
 					width: { xs: '100%', sm: 'auto' },
 					alignSelf: { xs: 'stretch', sm: 'flex-start' },
 				}}

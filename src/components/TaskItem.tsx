@@ -18,7 +18,6 @@ import {
 } from '../services/api';
 import { Task, TaskStatusUpdatePayload } from '../types/task';
 
-// Define TaskStatus type based on Task['status']
 type TaskStatus = Task['status'];
 
 interface TaskItemProps {
@@ -28,40 +27,35 @@ interface TaskItemProps {
 const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
 	const queryClient = useQueryClient();
 
-	// Mutation for updating task status
 	const { mutate: updateStatusMutate, isPending: isUpdating } = useMutation({
 		mutationFn: (payload: TaskStatusUpdatePayload) =>
 			apiUpdateTaskStatus(task._id, payload),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['tasks'] });
 		},
-		// Optional: Add onError handling
 	});
 
-	// Mutation for deleting a task
 	const { mutate: deleteTaskMutate, isPending: isDeleting } = useMutation({
 		mutationFn: () => apiDeleteTask(task._id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['tasks'] });
 		},
-		// Optional: Add onError handling
 	});
 
 	const handleStatusChange = (event: SelectChangeEvent<TaskStatus>) => {
 		const newStatus = event.target.value as TaskStatus;
 		const payload: TaskStatusUpdatePayload = { status: newStatus };
-		updateStatusMutate(payload); // Call the update mutation
+		updateStatusMutate(payload);
 	};
 
 	const handleDelete = () => {
 		if (
 			window.confirm(`Are you sure you want to delete task: "${task.title}"?`)
 		) {
-			deleteTaskMutate(); // Call the delete mutation
+			deleteTaskMutate();
 		}
 	};
 
-	// Combine loading states
 	const isProcessing = isUpdating || isDeleting;
 
 	return (
@@ -125,7 +119,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
 						</Box>
 					)}
 				</Box>
-				{/* Optional: Display description if it exists */}
+				{}
 				{task.description && (
 					<Typography
 						variant='body2'

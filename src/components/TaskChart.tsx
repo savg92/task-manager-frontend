@@ -13,9 +13,9 @@ import { Task } from '../types/task';
 import { Box, Typography, Paper, CircularProgress, Alert } from '@mui/material';
 
 const COLORS = {
-	TODO: '#FFBB28', // Yellow
-	IN_PROGRESS: '#00C49F', // Teal
-	COMPLETED: '#0088FE', // Blue
+	TODO: '#FFBB28',
+	IN_PROGRESS: '#00C49F',
+	COMPLETED: '#0088FE',
 };
 
 const TaskChart: React.FC = () => {
@@ -25,12 +25,12 @@ const TaskChart: React.FC = () => {
 		isLoading,
 		isError,
 	} = useQuery({
-		queryKey: ['tasks'], // Use the same query key as TaskList
+		queryKey: ['tasks'],
 		queryFn: getTasks,
 	});
 
 	const chartData = useMemo(() => {
-		if (!tasks) return []; // Return empty array if tasks are not loaded
+		if (!tasks) return [];
 		const counts: { [key in Task['status']]: number } = {
 			TODO: 0,
 			IN_PROGRESS: 0,
@@ -43,10 +43,10 @@ const TaskChart: React.FC = () => {
 
 		return Object.entries(counts)
 			.map(([name, value]) => ({
-				name: name.replace('_', ' '), // Format status name for display
+				name: name.replace('_', ' '),
 				value,
 			}))
-			.filter((item) => item.value > 0); // Only include statuses with tasks
+			.filter((item) => item.value > 0);
 	}, [tasks]);
 
 	if (isLoading) {
@@ -88,7 +88,6 @@ const TaskChart: React.FC = () => {
 	}
 
 	if (chartData.length === 0) {
-		// This case might happen if tasks exist but somehow counts are zero (unlikely with filter)
 		return (
 			<Paper
 				elevation={3}
@@ -123,11 +122,10 @@ const TaskChart: React.FC = () => {
 				<ResponsiveContainer>
 					<PieChart>
 						<Pie
-							data={chartData} // Use chartData derived from useQuery
+							data={chartData}
 							cx='50%'
 							cy='50%'
 							labelLine={false}
-							// label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
 							outerRadius={80}
 							fill='#8884d8'
 							dataKey='value'

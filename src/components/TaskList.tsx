@@ -4,19 +4,17 @@ import { getTasks } from '../services/api';
 import TaskItem from './TaskItem';
 
 const TaskList: React.FC = () => {
-	// Use React Query to fetch tasks
 	const {
 		data: tasks,
 		error,
 		isLoading,
 		isError,
 	} = useQuery({
-		queryKey: ['tasks'], // Unique key for this query
-		queryFn: getTasks, // The function to fetch data
+		queryKey: ['tasks'],
+		queryFn: getTasks,
 	});
 
 	if (isLoading) {
-		// Use isLoading from useQuery
 		return (
 			<Box
 				sx={{
@@ -32,7 +30,6 @@ const TaskList: React.FC = () => {
 	}
 
 	if (isError) {
-		// Use isError and error from useQuery
 		return (
 			<Alert
 				severity='error'
@@ -44,7 +41,6 @@ const TaskList: React.FC = () => {
 	}
 
 	if (!tasks || tasks.length === 0) {
-		// Check tasks data directly
 		return (
 			<Typography sx={{ mt: 2, textAlign: 'center' }}>
 				No tasks found. Add one!

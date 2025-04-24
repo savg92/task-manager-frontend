@@ -12,10 +12,9 @@ const HomePage: React.FC = () => {
 					component='h1'
 					gutterBottom
 					sx={{
-						// Make font smaller on extra-small screens
 						fontSize: {
-							xs: '1.8rem', // Font size for extra-small screens and up
-							sm: '2.125rem', // Default h4 size for small screens and up
+							xs: '1.8rem',
+							sm: '2.125rem',
 						},
 					}}
 				>

@@ -9,27 +9,22 @@ import { UserCredentials } from '../types/user';
 const LoginPage: React.FC = () => {
 	const navigate = useNavigate();
 
-	// Select state properties individually to prevent unnecessary re-renders
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 	const loading = useAuthStore((state) => state.loading);
 	const error = useAuthStore((state) => state.error);
 
-	// Select the login action directly from the store
 	const login = useAuthStore((state) => state.login);
 
 	useEffect(() => {
-		// Redirect if already authenticated
 		if (isAuthenticated) {
-			navigate('/'); // Redirect to home page
+			navigate('/');
 		}
 	}, [isAuthenticated, navigate]);
 
 	const handleLogin = async (
 		credentials: Pick<UserCredentials, 'email' | 'password'>
 	) => {
-		// Use the selected login action
 		await login(credentials);
-		// Navigation on success is handled by the useEffect hook
 	};
 
 	return (
@@ -38,7 +33,7 @@ const LoginPage: React.FC = () => {
 			maxWidth='xs'
 		>
 			{' '}
-			{/* Use xs for small forms */}
+			{}
 			<Box
 				sx={{
 					marginTop: 8,
@@ -47,7 +42,7 @@ const LoginPage: React.FC = () => {
 					alignItems: 'center',
 				}}
 			>
-				{/* You can add an Avatar or Logo here if desired */}
+				{}
 				<Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
 					<LockOutlinedIcon />
 				</Avatar>

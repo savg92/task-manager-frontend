@@ -7,7 +7,6 @@ const ProtectedRoute: React.FC = () => {
 	const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 	const isInitialized = useAuthStore((state) => state.isInitialized);
 
-	// Wait until the auth state is initialized
 	if (!isInitialized) {
 		return (
 			<Box
@@ -23,7 +22,6 @@ const ProtectedRoute: React.FC = () => {
 		);
 	}
 
-	// Once initialized, check authentication
 	if (!isAuthenticated) {
 		return (
 			<Navigate
@@ -33,7 +31,6 @@ const ProtectedRoute: React.FC = () => {
 		);
 	}
 
-	// Render child route if initialized and authenticated
 	return <Outlet />;
 };
 

@@ -1,13 +1,13 @@
-import React from 'react'; // Removed useEffect
+import React from 'react';
 import { Container, Typography, Box } from '@mui/material';
-import TaskChart from '../components/TaskChart'; // Import the chart component
+import TaskChart from '../components/TaskChart';
 
 const ChartPage: React.FC = () => {
 	return (
 		<Container maxWidth='md'>
 			<Box sx={{ my: 4 }}>
 				{' '}
-				{/* Add some margin top and bottom */}
+				{}
 				<Typography
 					variant='h4'
 					component='h1'
@@ -15,7 +15,7 @@ const ChartPage: React.FC = () => {
 				>
 					Task Status Chart
 				</Typography>
-				<TaskChart /> {/* Render the chart component */}
+				<TaskChart /> {}
 			</Box>
 		</Container>
 	);

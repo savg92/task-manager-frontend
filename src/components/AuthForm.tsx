@@ -11,7 +11,7 @@ import { UserCredentials } from '../types/user';
 
 interface AuthFormProps {
 	formType: 'login' | 'register';
-	onSubmit: (credentials: UserCredentials) => Promise<void>; // Make async to handle loading/errors
+	onSubmit: (credentials: UserCredentials) => Promise<void>;
 	loading: boolean;
 	error: string | null;
 }
@@ -24,12 +24,12 @@ const AuthForm: React.FC<AuthFormProps> = ({
 }) => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
-	const [username, setUsername] = useState(''); // Only for registration
+	const [username, setUsername] = useState('');
 	const [formError, setFormError] = useState<string | null>(null);
 
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
-		setFormError(null); // Clear previous form error
+		setFormError(null);
 
 		if (!email || !password || (formType === 'register' && !username)) {
 			setFormError('Please fill in all required fields.');
@@ -40,7 +40,6 @@ const AuthForm: React.FC<AuthFormProps> = ({
 			return;
 		}
 		if (password.length < 6) {
-			// Example basic validation
 			setFormError('Password must be at least 6 characters long.');
 			return;
 		}
@@ -48,17 +47,13 @@ const AuthForm: React.FC<AuthFormProps> = ({
 		const credentials: UserCredentials = {
 			email,
 			password,
-			...(formType === 'register' && { username }), // Add username only for registration
+			...(formType === 'register' && { username }),
 		};
 
 		try {
 			await onSubmit(credentials);
-			// On successful login/register, navigation should happen in the page component
-			// calling this form, based on the store state change.
 		} catch (err) {
-			// Error is handled by the parent component/store, but we could log it
 			console.error(`${formType} failed:`, err);
-			// The `error` prop will display the error from the store
 		}
 	};
 
@@ -73,7 +68,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
 				gap: 2,
 				width: '100%',
 				maxWidth: '400px',
-			}} // Limit form width
+			}}
 			noValidate
 			autoComplete='off'
 		>
