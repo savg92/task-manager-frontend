@@ -4,10 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "type-check": "tsc --noEmit -p tsconfig.app.json",
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run type-check && tsc -b && vite build",
     "lint": "eslint .",
-    "test": "vitest"
+    "deploy": "npm run build && \\\naws s3 sync dist/ s3://task-manager-frontend.example.com --delete \\\n  --cache-control public,max-age=31536000,immutable \\\n  --exclude index.html && \\\naws s3 cp dist/index.html s3://task-manager-frontend.example.com/ \\\n  --cache-control no-cache,no-store,max-age=0 && \\\naws cloudfront create-invalidation \\\n  --distribution-id E31BJ33VTNLI98 \\\n  --paths \"/index.html\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -24,9 +25,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.1.2",
     "@types/react-router-dom": "^5.3.3",
@@ -38,7 +36,6 @@
     "globals": "^16.0.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
-    "vite": "^6.3.1",
-    "vitest": "^3.1.2"
+    "vite": "^6.3.1"
   }
 }
