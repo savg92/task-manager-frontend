@@ -20,10 +20,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
+          # Keep cache enabled, but the clean install might bypass parts of it
           cache: 'npm'
 
+      - name: Remove lock file for clean install
+        run: rm -f package-lock.json
+
       - name: Install dependencies
-        run: npm install # Change from npm ci to npm install
+        run: npm install # Keep npm install
 
       - name: Lint code
         run: npm run lint
@@ -35,12 +39,12 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }} # Use OIDC role ARN from secrets
-          aws-region: ${{ secrets.AWS_REGION }} # e.g., us-east-1
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy assets to S3
         env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }} # e.g., task-manager-frontend.example.com
+          S3_BUCKET: ${{ secrets.S3_BUCKET_NAME }}
         run: |
           aws s3 sync dist/ s3://${S3_BUCKET} --delete \
             --cache-control public,max-age=31536000,immutable \
@@ -55,7 +59,7 @@ jobs:
 
       - name: Invalidate CloudFront cache
         env:
-          CLOUDFRONT_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} # e.g., E31BJ33VTNLI98
+          CLOUDFRONT_DIST_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
           aws cloudfront create-invalidation \
             --distribution-id ${CLOUDFRONT_DIST_ID} \
